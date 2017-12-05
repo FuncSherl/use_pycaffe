@@ -118,6 +118,7 @@ if __name__ == '__main__':
     paths=[]
     for i in range (10):
         paths.append(op.join(r'../handnums', str(i)+r'.bmp'))
+        paths.append(op.join(r'../handnums', str(i*11)+r'.bmp'))
     print paths
     print recognize(paths, mnist_deploy, mnist_model, pa)
     pass
