@@ -22,16 +22,16 @@ from matplotlib import pyplot as plt
 
 np.set_printoptions(threshold='nan')  #全部输出  
 
-mnist_root=r'D:\workspaces\vs2013\caffe-master\examples\mnist\test_minist'
+mnist_root=r'F:\workspaces\vs2013\caffe-master\caffe-master\TEST_MINIST'#r'D:\workspaces\vs2013\caffe-master\examples\mnist\test_minist'
 mnist_deploy=op.join(mnist_root, r'lenet.prototxt')
-mnist_model=op.join(mnist_root, r'snapshot\lenet_iter_10000.caffemodel')
+mnist_model=op.join(mnist_root, r'snapshot\minist_iter_10000.caffemodel')#lenet_iter_10000.caffemodel
 mnist_mean=op.join(mnist_root, r'minist_lmdb\mnist_mean.binaryproto')
 
 mnist_test=op.join(mnist_root, r'minist_lmdb\mnist_test_lmdb')
 
-#caffe.set_device(0)
-#caffe.set_mode_gpu()
-caffe.set_mode_cpu()
+caffe.set_device(0)
+caffe.set_mode_gpu()
+##caffe.set_mode_cpu()
 
 def read_lmdb(lmdb_path):
 
@@ -107,19 +107,19 @@ def recognize(dirls, deploy, model, mean):             #用opencv读入图片就
             show_weights(net.params['conv1'])
             
             tep=net.blobs['conv1'].data[1]
-            tep=tep[...]>128
-            show_mid_resu(tep)
+            #tep=tep[...]>128
+            show_mid_resu(tep,'conv')
             
             
             #####
             tx=net.params['conv1'][0].data
             tx=np.transpose(tx,(1,0,2,3))
             print tx.shape
-            tp=(tx.max()-tx.min())/2+tx.min()
-            tx=tx[...]>tp
+            tp=tx.max()-tx.min()
+            tx=(tx[...]-tx.min())/tp*255
             
            
-            show_mid_resu(  tx[0]  )
+            show_mid_resu(  tx[0]  ,'weight')
             ######
             
             #print net.blobs['prob'].data
@@ -137,9 +137,9 @@ def show_weights(da):
         print d
         print da[1].data[i]
 
-def show_mid_resu(data):
+def show_mid_resu(data,name='test'):
     l=math.sqrt(int(len(data)))
-    fig = plt.figure()  
+    fig = plt.figure(name)  
     
     for i,d in enumerate(data):
         ax = fig.add_subplot(l,l+1,i+1)  
@@ -172,7 +172,6 @@ if __name__ == '__main__':
     paths=[]
     for i in range (10):
         paths.append(op.join(r'../handnums', str(i)+r'.bmp'))
-        
     print paths
     recognize(paths, mnist_deploy, mnist_model, pa)
     pass
