@@ -12,19 +12,26 @@ import random
 import numpy as np  
   
 import cv2  
+import math
   
 import caffe 
 import caffe.proto 
 from caffe.proto import caffe_pb2  
 import lmdb  
+from matplotlib import pyplot as plt  
 
-mnist_root=r'F:\workspaces\vs2013\caffe-master\caffe-master\TEST_MINIST'
+np.set_printoptions(threshold='nan')  #全部输出  
+
+mnist_root=r'D:\workspaces\vs2013\caffe-master\examples\mnist\test_minist'
 mnist_deploy=op.join(mnist_root, r'lenet.prototxt')
-mnist_model=op.join(mnist_root, r'snapshot\minist_iter_10000.caffemodel')
+mnist_model=op.join(mnist_root, r'snapshot\lenet_iter_10000.caffemodel')
 mnist_mean=op.join(mnist_root, r'minist_lmdb\mnist_mean.binaryproto')
 
-caffe.set_device(0)
-caffe.set_mode_gpu()
+mnist_test=op.join(mnist_root, r'minist_lmdb\mnist_test_lmdb')
+
+#caffe.set_device(0)
+#caffe.set_mode_gpu()
+caffe.set_mode_cpu()
 
 def read_lmdb(lmdb_path):
 
@@ -50,6 +57,7 @@ def read_lmdb(lmdb_path):
         print('data is numpy.ndarray :')
         for data in data_array:
             cv2.imshow('test',data)
+            #cv2.imwrite(op.join(r'lmdb_imgs',str(label)+r'.png'), data)
             cv2.waitKey(0)
 
     lmdb_env.close()
@@ -69,8 +77,8 @@ def con_mean(path):
 def recognize(dirls, deploy, model, mean):             #用opencv读入图片就不要channel_swap and raw_scale
     net=caffe.Net(deploy, model, caffe.TEST)
     trans=caffe.io.Transformer({'data':net.blobs['data'].data.shape})
-    trans.set_mean('data', np.load(mean).mean(1).mean(1))
-    trans.set_transpose('data', (2,1,0))
+    #trans.set_mean('data', np.load(mean).mean(1).mean(1))
+    trans.set_transpose('data', (2,0,1))
     
     shap=net.blobs['data'].data.shape
     batch=shap[0]
@@ -93,10 +101,28 @@ def recognize(dirls, deploy, model, mean):             #用opencv读入图片就
             
         if cnt>=len(dirls)-1 or cnt%batch>=batch-1:
             
-            print net.blobs['data'].data
+            #print net.blobs['data'].data
             out=net.forward()
             
-            print net.blobs['prob'].data
+            show_weights(net.params['conv1'])
+            
+            tep=net.blobs['conv1'].data[1]
+            tep=tep[...]>128
+            show_mid_resu(tep)
+            
+            
+            #####
+            tx=net.params['conv1'][0].data
+            tx=np.transpose(tx,(1,0,2,3))
+            print tx.shape
+            tp=(tx.max()-tx.min())/2+tx.min()
+            tx=tx[...]>tp
+            
+           
+            show_mid_resu(  tx[0]  )
+            ######
+            
+            #print net.blobs['prob'].data
             for j in range(cnt%batch+1):
                 ret.append(net.blobs['prob'].data[j].flatten().argsort())  
                 print net.blobs['prob'].data[j].flatten().argmax()
@@ -104,21 +130,49 @@ def recognize(dirls, deploy, model, mean):             #用opencv读入图片就
             if cnt>=len(dirls)-1:
                 return ret
         cnt+=1
-            
-            
-        
-        
+def show_weights(da):
+    print da[0].data.shape
+    print da[1].data.shape
+    for i,d in enumerate(da[0].data):
+        print d
+        print da[1].data[i]
+
+def show_mid_resu(data):
+    l=math.sqrt(int(len(data)))
+    fig = plt.figure()  
     
+    for i,d in enumerate(data):
+        ax = fig.add_subplot(l,l+1,i+1)  
+        
+        #d=d[...]>128
+        print d
+        ax.imshow(d, cmap="gray")  
+    
+    plt.show()              
+           
+def test_plt():
+    img=cv2.imread(op.join(r'../lmdb_imgs', str(2)+r'.png'), cv2.IMREAD_GRAYSCALE)
+    fig = plt.figure()  
+    ax = fig.add_subplot(121)  
+    ax.imshow(img)  
+    ax.set_title("hei,i'am the first")  
+  
+    ax = fig.add_subplot(223)  
+    ax.imshow(img)#以灰度图显示图片  , cmap="gray"
+    ax.set_title("hei,i'am the second")#给图片加titile      
+        
+    plt.show()#显示刚才所画的所有操作  
     
 
 if __name__ == '__main__':
-    #read_lmdb(r'F:\workspaces\vs2013\caffe-master\caffe-master\TEST_MINIST\minist_lmdb\mnist_test_lmdb')
+    #read_lmdb(mnist_test)
+    #test_plt()
     pa=con_mean(mnist_mean)
     
     paths=[]
     for i in range (10):
         paths.append(op.join(r'../handnums', str(i)+r'.bmp'))
-        paths.append(op.join(r'../handnums', str(i*11)+r'.bmp'))
+        
     print paths
-    print recognize(paths, mnist_deploy, mnist_model, pa)
+    recognize(paths, mnist_deploy, mnist_model, pa)
     pass
