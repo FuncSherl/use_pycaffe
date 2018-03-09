@@ -104,9 +104,13 @@ def recognize(dirls, deploy, model, mean):             #用opencv读入图片就
             #print net.blobs['data'].data
             out=net.forward()
             
+            show_shape(net)
+            
             show_weights(net.params['conv1'])
             
-            tep=net.blobs['conv1'].data[1]
+            tep=net.blobs['conv1'].data[6]
+            
+            print type(net),type(net.blobs)
             #tep=tep[...]>128
             show_mid_resu(tep,'conv')
             
@@ -122,7 +126,7 @@ def recognize(dirls, deploy, model, mean):             #用opencv读入图片就
             show_mid_resu(  tx[0]  ,'weight')
             ######
             
-            #print net.blobs['prob'].data
+            print net.blobs['prob'].data
             for j in range(cnt%batch+1):
                 ret.append(net.blobs['prob'].data[j].flatten().argsort())  
                 print net.blobs['prob'].data[j].flatten().argmax()
@@ -130,12 +134,23 @@ def recognize(dirls, deploy, model, mean):             #用opencv读入图片就
             if cnt>=len(dirls)-1:
                 return ret
         cnt+=1
+def show_shape(net):
+    print 'data:'
+    for i in net.blobs:
+        print i,'-->',net.blobs[i].data.shape
+    
+    print 'params:'
+    for i in net.params:
+        print i
+        print 'weight','-->',net.params[i][0].data.shape
+        print 'bias','-->',net.params[i][1].data.shape
+
 def show_weights(da):
     print da[0].data.shape
     print da[1].data.shape
     for i,d in enumerate(da[0].data):
-        print d
-        print da[1].data[i]
+        pass#print d
+        #print da[1].data[i]
 
 def show_mid_resu(data,name='test'):
     l=math.sqrt(int(len(data)))
@@ -145,7 +160,7 @@ def show_mid_resu(data,name='test'):
         ax = fig.add_subplot(l,l+1,i+1)  
         
         #d=d[...]>128
-        print d
+        #print d
         ax.imshow(d, cmap="gray")  
     
     plt.show()              
@@ -171,7 +186,7 @@ if __name__ == '__main__':
     
     paths=[]
     for i in range (10):
-        paths.append(op.join(r'../handnums', str(i)+r'.bmp'))
+        paths.append(op.join(r'../lmdb_imgs', str(i)+r'.png'))
     print paths
     recognize(paths, mnist_deploy, mnist_model, pa)
     pass
