@@ -13,7 +13,6 @@ import numpy as np
   
 import cv2  
 import math
-  
 import caffe 
 import caffe.proto 
 from caffe.proto import caffe_pb2  
@@ -22,12 +21,12 @@ from matplotlib import pyplot as plt
 
 np.set_printoptions(threshold='nan')  #全部输出  
 
-mnist_root=r'F:\workspaces\vs2013\caffe-master\caffe-master\TEST_MINIST'#r'D:\workspaces\vs2013\caffe-master\examples\mnist\test_minist'
+mnist_root=r'/home/sherl/caffe/examples/mnist'#r'D:\workspaces\vs2013\caffe-master\examples\mnist\test_minist'
 mnist_deploy=op.join(mnist_root, r'lenet.prototxt')
-mnist_model=op.join(mnist_root, r'snapshot\minist_iter_10000.caffemodel')#lenet_iter_10000.caffemodel
-mnist_mean=op.join(mnist_root, r'minist_lmdb\mnist_mean.binaryproto')
+mnist_model=op.join(mnist_root, r'lenet_iter_10000.caffemodel')#lenet_iter_10000.caffemodel
+mnist_mean=op.join(mnist_root, r'mnist_mean.binaryproto')
 
-mnist_test=op.join(mnist_root, r'minist_lmdb\mnist_test_lmdb')
+mnist_test=op.join(mnist_root, r'mnist_test_lmdb')
 
 caffe.set_device(0)
 caffe.set_mode_gpu()
@@ -77,7 +76,7 @@ def con_mean(path):
 def recognize(dirls, deploy, model, mean):             #用opencv读入图片就不要channel_swap and raw_scale
     net=caffe.Net(deploy, model, caffe.TEST)
     trans=caffe.io.Transformer({'data':net.blobs['data'].data.shape})
-    #trans.set_mean('data', np.load(mean).mean(1).mean(1))
+    trans.set_mean('data', np.load(mean).mean(1).mean(1))
     trans.set_transpose('data', (2,0,1))
     
     shap=net.blobs['data'].data.shape
@@ -165,7 +164,7 @@ def test_plt():
     
 
 if __name__ == '__main__':
-    #read_lmdb(mnist_test)
+    #read_lmdb(r'/media/sherl/本地磁盘/wokmaterial/ruizhi/lmdb/train_lmdb')
     #test_plt()
     pa=con_mean(mnist_mean)
     
