@@ -12,8 +12,8 @@ import numpy as np
 from multiprocessing import Pool
 import video_pro as vp
 
-input_dir = './strip_video'#'E:/wokmaterial/ruizhi/normal_videos_unzip2'#
-output_dir ='./output_mp4format'# 'E:/wokmaterial/ruizhi/normal_videos_sliced10'#
+input_dir = r'/media/sherl/本地磁盘1/wokmaterial/ruizhi/BKVideos/validate/pos'#'E:/wokmaterial/ruizhi/normal_videos_unzip2'#
+output_dir =r'/media/sherl/本地磁盘1/wokmaterial/ruizhi/BKVideos/validate/pos_imgs'# 'E:/wokmaterial/ruizhi/normal_videos_sliced10'#
 
 time_len = 10  # how many seconds
 num_def = 3  # 指定1个视频截取几个
@@ -44,7 +44,8 @@ def start(inpu, output):
                 vp.cut_video(tep_in, tep_out)
                 procnt += 1
                 if procnt and procnt % report_gap == 0:  # 处理进度汇报
-                    sms.sendlocalmes("13001071655", "cutvideo:" + str(procnt))
+                    #sms.sendlocalmes("13001071655", "cutvideo:" + str(procnt))
+                    pass
             
 
 if __name__ == '__main__':
@@ -62,7 +63,7 @@ def multi_start(inpu, output):
             
             if not op.exists(tep_out):
                 os.makedirs(tep_out)
-            multi_start(tep_in, tep_out)#output
+            multi_start(tep_in, output)#output
 
         else:
             ext = op.splitext(i)
@@ -72,7 +73,7 @@ def multi_start(inpu, output):
                 # vp.cut_video(tep_in, tep_out)
                 
                 #result.append(pro_pool.apply_async(vp.slice_video, args=(tep_in, tep_out, time_len)))
-                pro_pool.apply_async(vp.strip_video, args=(tep_in, tep_out,5,5))
+                pro_pool.apply_async(vp.sanpshot_a_video, args=(tep_in, output,1))
                 
                 #vp.slice_video(tep_in, tep_out)
 

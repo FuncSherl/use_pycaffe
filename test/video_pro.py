@@ -162,5 +162,43 @@ def strip_video(inpu, output,rate_st=5,rate_ed=5): #前百分之多少、后百�
 
 
 
+def sanpshot_a_video(indir, outdir, gap=1):#return [Bk cnt, none BK cnt]
+    videoCapture=cv2.VideoCapture(indir)
+    if (videoCapture.isOpened()):  
+        print 'Open:', indir 
+    else:  
+        print 'Fail to open:', indir  
+        return None
+    
+    videorate = videoCapture.get(cv2.CAP_PROP_FPS)
+    allcnt = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)  # 总帧数
+    
+    
+    cnt=0
+    batcnt=0
+    success, frame = videoCapture.read()  # 读取第一帧  
+    print frame.shape,'rate:',videorate,' framescnt:',allcnt
+    while success and cnt <allcnt-1:  
+        # frame = frame[0:1536,1200:1800]#截取画面  
+        videoCapture.set(cv2.CAP_PROP_POS_FRAMES, cnt)
+        success, frame = videoCapture.read()  # 循环读取下一帧  
+        cnt +=int(gap*videorate)
+        
+        if success:                    
+            batcnt+=1
+            tepext=op.splitext(op.split(indir)[-1])[0]
+            tepd=op.join(outdir, tepext)
+            tepd+="_"+str(batcnt)+".jpg"
+            cv2.imwrite( tepd,frame)
+            
+        
+        
+    videoCapture.release() 
+    
+    print "done!",indir,str(batcnt)
+    
+    return batcnt
+
+
 if __name__ == '__main__':
     pass
