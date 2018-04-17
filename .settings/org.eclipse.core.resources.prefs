@@ -1,5 +1,7 @@
 eclipse.preferences.version=1
+encoding//RMPE/VGG_SSD.py=utf-8
 encoding//RMPE/demo.py=utf-8
+encoding//RMPE/fromanno2bounding.py=utf-8
 encoding//generate_lmdb/gen_lmdb.py=utf-8
 encoding//test/cut_video.py=utf-8
 encoding//test/genlist.py=utf-8
