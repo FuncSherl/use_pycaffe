@@ -8,7 +8,7 @@ Created on 2018年3月9日
 import os,random
 import os.path as op
 
-root=r'F:/workmaterials/imgs_1000'
+root=r'/media/sherl/WORK/workmaterials/imgs_1000'
 train_txt=r'train_txt.txt'
 test_txt=r'test_txt.txt'
 
@@ -38,6 +38,10 @@ def gen_list(ipath, train , test, classfile='classtodoc.txt', synset='synset_wor
                         for j in os.listdir(tep):#便利第二级目录，接触到图片
                             if op.splitext(j)[-1] in ['.jpg','.JPG','.PNG','.png']:
                                 patho=op.join(i,j)
+                                '''
+                                if random.randint(1,100)<=96:
+                                    continue
+                                '''
                                 print patho+' '+str(classorder)
                                 if random.randint(1,100)<=rate:#随机定为train或者test集合里
                                     tra.write(patho+' '+str(classorder)+'\n')
